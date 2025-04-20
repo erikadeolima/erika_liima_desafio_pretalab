@@ -18,18 +18,20 @@ const exitAction = () => {
 }
 
 const getMedals = (country) => {
-    rl.question('Digite as medalhas de ouro:', (goldenMedals) => {
-      rl.question('Digite as medalhas de prata:', (silverMedals) => {
-        rl.question('Digite as medalhas de bronze:', (bronzeMedals) => {
+    rl.question('Digite as medalhas de ouro: ', (goldenMedals) => {
+      rl.question('Digite as medalhas de prata: ', (silverMedals) => {
+        rl.question('Digite as medalhas de bronze: ', (bronzeMedals) => {
           countries[country] = {
             ouro: Number(goldenMedals),
             prata: Number(silverMedals),
             bronze: Number(bronzeMedals)
           };
+          console.log(`Medalhas registradas para ${country}: OURO: ${countries[country].ouro}, PRATA: ${countries[country].prata}, BRONZE: ${countries[country].bronze}`);
+          getCountry();
         });
       });
     });
-  }
+}
 
   const verifyExitAction = (value, callback) => {
     if (value.toLowerCase() === 'sair') {
@@ -50,19 +52,20 @@ const getCountry = () =>{
 }
 
 const verifyAction = (action, country) => {
-  rl.question('Digite Y para SIM, N para NÃO ou Sair para SAIR:', (isCorrect) =>{
-    verifyExitAction(isCorrect, () => {
-        if (isCorrect.toLowerCase() === 'y') {
-            action(country);
-            if(countries[country]){
-              console.log(`País: ${country}, Medalhas: ${countries[country]}`);
-            }
+    rl.question('Por favor, digite Y para SIM, N para NÃO ou Sair para SAIR: ', (isCorrect) =>{
+      verifyExitAction(isCorrect, () => {
+          if (isCorrect.toLowerCase() === 'y') {
+              action(country);
           } else if (isCorrect.toLowerCase() === 'n') {
-            getCountry();
-        }
+              console.log('Vamos tentar novamente.');
+              getCountry();
+          } else {
+              console.log('Resposta não reconhecida.');
+              verifyAction(action, country);
+          }
+      });
     });
-  });
-}
+  }
 
 const main = () => {
     console.log('Bem-vindo ao programa de contagem de medalhas!');
