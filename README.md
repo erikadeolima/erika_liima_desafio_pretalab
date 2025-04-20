@@ -45,6 +45,8 @@ O ranking de medalhas será exibido em ordem decrescente de medalhas. Em caso de
 
 O ranking de medalhas será exibido no seguinte formato:
 
+```bash
+
 Posição| País           | Ouro | Prata | Bronze | Total
 -------|----------------|------|-------|--------|------
 1      | Brasil         | 10   | 5     | 3      | 18
@@ -52,5 +54,6 @@ Posição| País           | Ouro | Prata | Bronze | Total
 3      | Argentina      | 0    | 8     | 10     | 18
 4      | Alemanha       | 0    | 7     | 11     | 18
 ...
+```
 
 
