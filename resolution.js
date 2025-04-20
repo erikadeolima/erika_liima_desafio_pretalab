@@ -6,18 +6,32 @@ const rl = readline.createInterface({
 });
 
 let countryTyped = '';
-
 const countries = {};
 
 const formatCountryName = (countryName) => {
     if (!countryName || countryName.length === 0) return countryName;
     return countryName.charAt(0).toUpperCase() + countryName.slice(1).toLowerCase();
-  };
+};
 
 const calculateTotalMedals = (country) => {
     const medals = countries[country];
     return medals.ouro + medals.prata + medals.bronze;
 };
+
+const verifyMedalType = (medal) => {
+    if (medal === 'ouro' || medal === 'prata' || medal === 'bronze') {
+        return true;
+    }
+    return false;
+}
+
+const verifyExitAction = (value, callback) => {
+    if (value.toLowerCase() === 'sair') {
+        exitAction();
+        return;
+    }
+    callback();
+}
 
 const rankingSorting = (ranking) => {
     return ranking.sort((a, b) => {
@@ -66,30 +80,67 @@ const showRanking = () => {
     console.log('=======================================================\n');
 };
 
-const exitAction = () => {
-    console.log('\n');
-    console.log('Saindo do programa...');
-    console.log('\n');
-    if (Object.keys(countries).length > 0) {
-        showRanking();
-    } else {
-        console.log('Nenhum país foi registrado.');
-        console.log('\n');
-    }
-    rl.close();
+const verifyAction = (actionCaseYes, actionCaseNo, country) => {
+    rl.question('\nPor favor, digite Y para SIM, N para NÃO ou Sair para SAIR: ', (isCorrect) =>{
+        verifyExitAction(isCorrect, () => {
+            if (isCorrect.toLowerCase() === 'y') {
+                actionCaseYes(country);
+            } else if (isCorrect.toLowerCase() === 'n') {
+                console.log('\nVamos tentar novamente.');
+                actionCaseNo();
+            } else {
+                console.log('\nResposta não reconhecida.');
+                verifyAction(actionCaseYes, actionCaseNo, country);
+            }
+        });
+    });
+}
+
+const getNewMedalValue = (medal, country) =>{
+    verifyExitAction(medal, () => {
+        if (verifyMedalType(medal)) {
+            rl.question(`\n Digite o novo valor para medalhas de ${medal}: `, (newValue) => {
+                const numValue = Number(newValue) || 0;
+                
+                countries[country][medal] = numValue;
+                
+                console.log(`\n Medalhas atualizadas para ${country}: OURO: ${countries[country].ouro}, PRATA: ${countries[country].prata}, BRONZE: ${countries[country].bronze}`);
+                rl.question('\n Deseja modificar outra medalha? (Y/N): ', (answer) => {
+                    if (answer.toLowerCase() === 'y') {
+                        modifyMedals(country);
+                    } else {
+                        showRanking();
+                        getCountry();
+                    }
+                });
+            });
+        } else {
+            console.log('\n Tipo de medalha inválido. Por favor, escolha entre ouro, prata ou bronze.\n');
+            modifyMedals(country);
+        }
+    });
+}
+
+const modifyMedals = (country) => {
+    console.log(`\nModificando medalhas para ${country}:`);
+    console.log(`\nMedalhas atuais: OURO: ${countries[country].ouro}, PRATA: ${countries[country].prata}, BRONZE: ${countries[country].bronze}`);
+    
+    rl.question('\nQual medalha deseja modificar? (ouro/prata/bronze): ', (medalType) => {
+        medalType = medalType.toLowerCase();
+        getNewMedalValue(medalType, country);
+    });
 }
 
 const getMedals = (country) => {
-    rl.question('Digite as medalhas de ouro: ', (goldenMedals) => {
-        rl.question('Digite as medalhas de prata: ', (silverMedals) => {
-            rl.question('Digite as medalhas de bronze: ', (bronzeMedals) => {
+    rl.question('\nDigite as medalhas de ouro: ', (goldenMedals) => {
+        rl.question('\nDigite as medalhas de prata: ', (silverMedals) => {
+            rl.question('\nDigite as medalhas de bronze: ', (bronzeMedals) => {
                 countries[country] = {
                     ouro: Number(goldenMedals) || 0,
                     prata: Number(silverMedals) || 0,
                     bronze: Number(bronzeMedals) || 0
                 };
-                console.log('\n');
-                console.log(`Medalhas registradas para ${country}: OURO: ${countries[country].ouro}, PRATA: ${countries[country].prata}, BRONZE: ${countries[country].bronze}`);
+                console.log(`\nMedalhas registradas para ${country}: OURO: ${countries[country].ouro}, PRATA: ${countries[country].prata}, BRONZE: ${countries[country].bronze}`);
                 showRanking();
                 getCountry();
             });
@@ -97,40 +148,34 @@ const getMedals = (country) => {
     });
 }
 
-const verifyExitAction = (value, callback) => {
-    if (value.toLowerCase() === 'sair') {
-        exitAction();
-        return;
+const verifyIfCountryExists = (country) => {
+    if (countries[country]) {
+        console.log(`\nO país ${country} já existe no ranking!`);
+        console.log('\nDeseja modificar as medalhas deste país? (Y/N)');
+        verifyAction(modifyMedals, getCountry, country);
+    } else{
+        getMedals(country);
     }
-    callback();
 }
 
 const getCountry = () =>{
     rl.question('Digite um país: ', (country) => {
         verifyExitAction(country, () => {
             countryTyped = formatCountryName(country);
-            console.log(`Você digitou: ${countryTyped}, está correto?`);
-            verifyAction(getMedals, countryTyped);
+            console.log(`\nVocê digitou: ${countryTyped}, está correto?`);
+            verifyAction(verifyIfCountryExists, getCountry, countryTyped);
         });
     });
 }
 
-const verifyAction = (action, country) => {
-    rl.question('Por favor, digite Y para SIM, N para NÃO ou Sair para SAIR: ', (isCorrect) =>{
-        verifyExitAction(isCorrect, () => {
-            if (isCorrect.toLowerCase() === 'y') {
-                action(country);
-            } else if (isCorrect.toLowerCase() === 'n') {
-                console.log('Vamos tentar novamente.');
-                console.log('\n');
-                getCountry();
-            } else {
-                console.log('Resposta não reconhecida.');
-                console.log('\n');
-                verifyAction(action, country);
-            }
-        });
-    });
+const exitAction = () => {
+    console.log('\nSaindo do programa...\n');
+    if (Object.keys(countries).length > 0) {
+        showRanking();
+    } else {
+        console.log('\nNenhum país foi registrado.\n');
+    }
+    rl.close();
 }
 
 const main = () => {
@@ -144,4 +189,4 @@ const main = () => {
     getCountry();
 }
 
-main()
+main();
