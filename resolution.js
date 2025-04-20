@@ -9,10 +9,30 @@ let countryTyped = '';
 
 const countries = {};
 
+const formatCountryName = (countryName) => {
+    if (!countryName || countryName.length === 0) return countryName;
+    return countryName.charAt(0).toUpperCase() + countryName.slice(1).toLowerCase();
+  };
+
 const calculateTotalMedals = (country) => {
     const medals = countries[country];
     return medals.ouro + medals.prata + medals.bronze;
 };
+
+const rankingSorting = (ranking) => {
+    return ranking.sort((a, b) => {
+        if (b.total !== a.total) {
+            return b.total - a.total;
+        }
+        if (b.ouro !== a.ouro) {
+            return b.ouro - a.ouro;
+        }
+        if (b.prata !== a.prata) {
+            return b.prata - a.prata;
+        }
+        return b.bronze - a.bronze;
+    });
+}
 
 const showRanking = () => {
     console.log('\n======= RANKING DE PAÍSES POR TOTAL DE MEDALHAS =======\n');
@@ -27,8 +47,8 @@ const showRanking = () => {
         };
     });
     
-    ranking.sort((a, b) => b.total - a.total);
-    
+    rankingSorting(ranking);
+
     console.log('Posição| País           | Ouro | Prata | Bronze | Total');
     console.log('-------|----------------|------|-------|--------|------');
     
@@ -88,7 +108,7 @@ const verifyExitAction = (value, callback) => {
 const getCountry = () =>{
     rl.question('Digite um país: ', (country) => {
         verifyExitAction(country, () => {
-            countryTyped = country;
+            countryTyped = formatCountryName(country);
             console.log(`Você digitou: ${countryTyped}, está correto?`);
             verifyAction(getMedals, countryTyped);
         });
